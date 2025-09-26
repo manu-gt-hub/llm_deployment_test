@@ -37,16 +37,11 @@ def load_data():
 
         file_bytes = fh.getvalue()
 
-        # Save a local backup of the downloaded CSV
-        with open("backup_drive.csv", "wb") as f:
-            f.write(file_bytes)
-
-        fh2 = io.BytesIO(file_bytes)
-        df = pd.read_csv(fh2)
+        df = pd.read_csv(io.BytesIO(file_bytes))
         print(f"✅ CSV loaded from Google Drive (Google Sheets export) with {len(df)} rows.")
     except Exception as e:
         print(f"📄 CSV not found on Drive or error occurred: {e}. Creating a new empty DataFrame.")
-        df = pd.DataFrame(columns=["value", "date"])
+        df = pd.DataFrame(columns=["symbol", "buy_price", "buy_date", "amount", "sell_value", "sell_date", "buy_sell_days_diff", "percentage_benefit"])
     return df
 
 def add_row(df):

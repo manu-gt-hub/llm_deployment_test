@@ -1,32 +1,49 @@
+from dotenv import load_dotenv
+import ast
 import os
-from tools.google_handler import load_data, add_row, save_dataframe
+import pandas as pd
+from tools import finnhub_client,historicals,web_scrapper,custom_financial_calc as cfc,general,llms
+
+# Load .env file only if not running in production (e.g., GitHub Actions)
+if not os.getenv("GITHUB_ACTIONS"):  # This var is auto-set in GitHub Actions
+    load_dotenv()
 
 def main():
-    # SECRET AREA
-    secret = "empty"
-    print(f"El secret antes de acceder a el es: {secret}")
+
+    symbol_list = ast.literal_eval(os.environ.get("SYMBOLS_INTEREST_LIST", "[]"))
     
-    secret = os.getenv("SECRET_TEST")
+    top_losers_data = finnhub_client.analyze_market_losers_from_interest_list(symbol_list)
 
-    if secret != 'empty':
-         print("✅ El secret fue cargado correctamente.")
+    trading_advisor_df = pd.DataFrame(top_losers_data)
+
+    for loser in top_losers_data:
+
+        symbol=loser['symbol']
+        current_price=loser['current_price']
+        # get historical data        
+        hist_data = historicals.get_historical_data(symbol)
+        
+        # get interest metrics
+        metrics = cfc.evaluate_buy_interest(symbol,hist_data,current_price)
+
+        # get trading view opinion
+        td_opinion = web_scrapper.get_trading_view_opinion(symbol)
+
+        # add opinions
+        general.add_opinion(symbol,trading_advisor_df,"manual_financial_analysis",metrics["evaluation"])
+        general.add_opinion(symbol,trading_advisor_df,"trading_view_opinion",td_opinion)
+
+        if "failed" not in metrics["evaluation"]:
+            general.add_opinion(symbol,trading_advisor_df,"llm_opinion",llms.get_llm_signals_analysis( metrics["signals"],symbol,current_price))
+        else:
+            general.add_opinion(symbol,trading_advisor_df,"llm_opinion","error: metrics not provided")
     
-    if secret == 'madness':
-        print("✅ El contenido del secret fue cargado correctamente.")
-        print(f"El secret despues de acceder a el es: {secret}")
-    else:
-        print("❌ El contenido del secret no es correcto.")
+    trading_advisor_df = general.generate_decision_column(trading_advisor_df)    
+    trading_advisor_df.to_csv("resources/report.csv", index=False)
 
-    # CSV AREA
-    print("🔧 Creando DataFrame inicial...")
-    df = load_dataframe()
+    # TODO: review transactions
+    # TODO: filtrar por 'BUY' en decisiones
+    # TODO: send email
     
-    print("➕ Añadiendo nueva fila...")
-    df = añadir_fila(df)
-
-    print("💾 Guardando CSV actualizado...")
-    guardar_dataframe(df)
-
-
 if __name__ == "__main__":
     main()

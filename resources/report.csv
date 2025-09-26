@@ -1,0 +1,4 @@
+symbol,current_price,change_percent,manual_financial_analysis,trading_view_opinion,llm_opinion,decision
+AMD,159.46,-1.1223,❌ SELL,SELL (9) - Neutral (8) - Buy (9),"sell - Current price is significantly above moving averages. (ma50: 83.92, ma200: 84.71, rsi: 49.51, macd: 0.14, macd_signal: 0.19)",SELL
+META,743.75,-0.689,✋ HOLD,SELL (13) - Neutral (8) - Buy (5),"sell - Current price is significantly above moving averages. (ma50: 273.792, ma200: 291.050125, rsi: 50.35, macd: -3.50, macd_signal: -3.07)",SELL
+AAPL,255.46,-0.5489,✋ HOLD,BUY (14) - Sell (5) - Neutral (7),"sell - Current price is significantly above moving averages. (ma50: 117.33, ma200: 126.80, rsi: 47.17, macd: -0.72, macd_signal: -0.47)",HOLD

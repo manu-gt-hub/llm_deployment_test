@@ -72,11 +72,18 @@ def test_evaluate_buy_interest_buy_or_sell_or_hold():
     assert eval in ["✅ BUY", "❌ SELL", "✋ HOLD"]
 
 def test_evaluate_buy_interest_handles_bad_data():
-    bad_df = pd.DataFrame({"date": ["not_a_date"], "close": ["not_a_number"]})
+
+    # Create intentionally bad DataFrame (invalid date and close values)
+    bad_df = pd.DataFrame({
+        "date": ["not_a_date"],
+        "close": ["not_a_number"]
+    })
     current_price = 100.0
 
+    # Call the function with bad data
     result = evaluate_buy_interest("MSFT", bad_df, current_price)
 
+    # Assert the function handles the error gracefully
     assert result["evaluation"] == "⚠️ Evaluation failed"
-    assert result["active_signals"] == ["failed"]
+    assert result["active_signals"] == ["Evaluation failed due to error."]
     assert "error" in result["signals"]

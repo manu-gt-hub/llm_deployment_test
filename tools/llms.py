@@ -1,8 +1,14 @@
 import requests
 import httpx
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+if not os.getenv("GITHUB_ACTIONS"):  # This var is auto-set in GitHub Actions
+    load_dotenv()
 
 def get_llm_file_analysis():
+    # TODO: upload the file to openAI
     raise ("to be defined")
 
 def get_llm_signals_analysis(signals, symbol, current_price):
@@ -18,7 +24,9 @@ def get_llm_signals_analysis(signals, symbol, current_price):
     - LLM-generated text recommendation or error message string
     """
 
-    model_name = "gpt-4o-mini"
+    model_name = os.getenv('LLM_MODEL_NAME') 
+    revenue_percentage = os.getenv('REVENUE_PERCENTAGE') 
+    
     print(f"Calling LLM model {model_name}...")
 
     # Prepare metrics string from signals dictionary
@@ -27,13 +35,12 @@ def get_llm_signals_analysis(signals, symbol, current_price):
     prompt = (
         f"Return me a clear answer about the provided symbol and the following metrics taken from its historical data: {metrics}"
         f"Take a look at the indicators: SMA_50, SMA_200, RSI, MACD, MACD_Signal, MACD_Hist. "
-        f"My intention when buying is to get a profit of 10-12% within the next month. "
+        f"My intention when buying is to get a profit of around {revenue_percentage}% within the next month. "
         f"The answer has to be: 'sell', 'hold', 'buy', or 'empty decision' "
         f"(in case there is no clear decision or insufficient input data), "
         f"and a brief explanation in a few words (max. 20). "
         f"After the explanation, please print the indicators between parentheses."
     )
-    print(f"Prompt: {prompt}")
 
     try:
         openai = OpenAI(http_client=httpx.Client(verify=False))
